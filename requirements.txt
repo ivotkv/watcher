@@ -1,0 +1,6 @@
+PyYAML
+twilio
+python-postmark
+requests>=2.13
+sqlalchemy
+psycopg2-binary

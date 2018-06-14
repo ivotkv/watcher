@@ -1,0 +1,44 @@
+alert:
+    email:
+        - 'on-call@example.com'
+    sms:
+        - '+15555555555'
+postmark:
+    api_key: ''
+    from: 'message@example.com'
+twilio:
+    account_sid: ''
+    auth_token: ''
+    from: '+15555555555'
+watchers:
+    data_freshness:
+        data_name:
+            type: postgresql
+            host: localhost
+            user: user
+            pass: password
+            database: database
+            schema: 
+            table: table
+            date_field: date
+            sort_field: id
+            threshold: 5
+            alert:
+                email:
+                    - 'data-alerts@example.com'
+    ssh_check:
+        my_service:
+            host: hostname
+            user: root
+            key: /path/to/ssh_key
+            commands:
+                - ['systemctl status my-service.service | grep Active | grep running']
+            alert:
+                email:
+                    - 'service-alerts@example.com'
+    url_check:
+        'https://example.com':
+            latency: 1000
+        'https://example.com/status':
+            response: '^OK$'
+            latency: 1000
