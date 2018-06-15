@@ -21,4 +21,4 @@ Optional per-URL config parameters:
 * `response`: run `re.search()` on the response with the given pattern
 * `latency`: maximum latency in milliseconds
 
-Checks run every minute, alerts sent every 5 minutes.
+Checks run every minute, alerts sent every 5 minutes. Each check can have different alert targets.

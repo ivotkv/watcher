@@ -53,22 +53,22 @@ class Watcher(object):
     def run(self):
         while True:
             now = datetime.now()
-            for url, opts in self.config.iteritems():
+            for url, cfg in self.config.iteritems():
                 headers = {
-                    'user-agent': opts['user_agent'] if 'user_agent' in opts else USER_AGENT
+                    'user-agent': cfg['user_agent'] if 'user_agent' in cfg else USER_AGENT
                 }
                 r = requests.get(url, headers=headers)
                 ms = r.elapsed.microseconds / 1000
                 conds = ["- The HTTP code is not 200"]
                 ok = r.status_code == 200
-                if 'response' in opts:
-                    conds.append("- The response doesn't match '{0}'".format(opts['response']))
-                    ok = ok and re.search(opts['response'], r.text)
-                if 'latency' in opts:
-                    conds.append("- The latency exceeds {0} ms".format(opts['latency']))
-                    ok = ok and ms < opts['latency']
+                if 'response' in cfg:
+                    conds.append("- The response doesn't match '{0}'".format(cfg['response']))
+                    ok = ok and re.search(cfg['response'], r.text)
+                if 'latency' in cfg:
+                    conds.append("- The latency exceeds {0} ms".format(cfg['latency']))
+                    ok = ok and ms < cfg['latency']
                 if not ok:
                     if url not in self.alerts or now - self.alerts[url] > timedelta(seconds=300):
-                        alert_all(SUBJECT.format(url), BODY.format(url, r.status_code, r.text, ms, '\n'.join(conds)))
+                        alert_all(SUBJECT.format(url), BODY.format(url, r.status_code, r.text, ms, '\n'.join(conds)), targets=cfg.get('alert'))
                         self.alerts[url] = now
             sleep(60)
