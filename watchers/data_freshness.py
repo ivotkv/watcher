@@ -14,6 +14,7 @@
 from __future__ import print_function, unicode_literals, absolute_import
 
 from time import sleep
+from pytz import timezone
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from .helpers.alerts import alert_all
@@ -45,6 +46,7 @@ class Watcher(object):
                 'query': "select {0} from {1} order by {2} desc limit 1".format(cfg['date_field'],
                                                                                 cfg['table'],
                                                                                 cfg['sort_field']),
+                'timezone': timezone(cfg['date_tz']),
                 'threshold': cfg['threshold'],
                 'alert': cfg.get('alert')
             }
@@ -54,8 +56,8 @@ class Watcher(object):
         while True:
             for name, cfg in self.config.iteritems():
                 with cfg['engine'].connect() as conn:
-                    latest = conn.execute(cfg['query']).fetchall()[0][0]
-                now = datetime.now()
+                    latest = cfg['timezone'].localize(conn.execute(cfg['query']).fetchall()[0][0])
+                now = timezone('UTC').localize(datetime.utcnow())
                 if now - latest > timedelta(minutes=cfg['threshold']):
                     if name not in self.alerts or now - self.alerts[name] > timedelta(seconds=300):
                         alert_all(SUBJECT.format(name), BODY.format(name, cfg['threshold'], latest), targets=cfg['alert'])
