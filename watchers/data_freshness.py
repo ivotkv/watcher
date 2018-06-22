@@ -46,7 +46,7 @@ class Watcher(object):
                 'query': "select {0} from {1} order by {2} desc limit 1".format(cfg['date_field'],
                                                                                 cfg['table'],
                                                                                 cfg['sort_field']),
-                'timezone': timezone(cfg['date_tz']),
+                'timezone': timezone(cfg['timezone']),
                 'threshold': cfg['threshold'],
                 'alert': cfg.get('alert')
             }

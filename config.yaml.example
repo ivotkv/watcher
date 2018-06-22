@@ -22,7 +22,7 @@ watchers:
             table: table
             date_field: date
             sort_field: id
-            date_tz: 'UTC'
+            timezone: 'UTC'
             threshold: 5
             alert:
                 email:
