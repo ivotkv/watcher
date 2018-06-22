@@ -21,9 +21,12 @@ watchers:
             schema: 
             table: table
             date_field: date
+            date_tz: 'UTC'
             sort_field: id
-            timezone: 'UTC'
             threshold: 5
+            silent_from: 0
+            silent_until: 8
+            silent_tz: 'America/Montreal'
             alert:
                 email:
                     - 'data-alerts@example.com'

@@ -46,8 +46,11 @@ class Watcher(object):
                 'query': "select {0} from {1} order by {2} desc limit 1".format(cfg['date_field'],
                                                                                 cfg['table'],
                                                                                 cfg['sort_field']),
-                'timezone': timezone(cfg['timezone']),
+                'date_tz': timezone(cfg['date_tz']),
                 'threshold': cfg['threshold'],
+                'silent_from': cfg.get('silent_from'),
+                'silent_until': cfg.get('silent_until'),
+                'silent_tz': timezone(cfg['silent_tz']) if cfg.get('silent_tz') else timezone(cfg['date_tz']),
                 'alert': cfg.get('alert')
             }
         self.alerts = {}
@@ -55,11 +58,23 @@ class Watcher(object):
     def run(self):
         while True:
             for name, cfg in self.config.iteritems():
+                # check whether to silence
+                if cfg['silent_from'] is not None and cfg['silent_until'] is not None:
+                    now = datetime.now(cfg['silent_tz'])
+                    if cfg['silent_from'] < cfg['silent_until']:
+                        if cfg['silent_from'] <= now.hour < cfg['silent_until']:
+                            continue
+                    else:
+                        if cfg['silent_from'] <= now.hour or now.hour < cfg['silent_until']:
+                            continue
+
+                # fetch and check latest date
+                now = datetime.now(cfg['date_tz'])
                 with cfg['engine'].connect() as conn:
-                    latest = cfg['timezone'].localize(conn.execute(cfg['query']).fetchall()[0][0])
-                now = timezone('UTC').localize(datetime.utcnow())
+                    latest = cfg['date_tz'].localize(conn.execute(cfg['query']).fetchall()[0][0])
                 if now - latest > timedelta(minutes=cfg['threshold']):
                     if name not in self.alerts or now - self.alerts[name] > timedelta(seconds=300):
                         alert_all(SUBJECT.format(name), BODY.format(name, cfg['threshold'], latest), targets=cfg['alert'])
                         self.alerts[name] = now
+
             sleep(60)
