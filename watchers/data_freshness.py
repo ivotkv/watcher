@@ -50,6 +50,7 @@ class Watcher(object):
                 'threshold': cfg['threshold'],
                 'silent_from': cfg.get('silent_from'),
                 'silent_until': cfg.get('silent_until'),
+                'silent_weekends': bool(cfg.get('silent_weekends')),
                 'silent_tz': timezone(cfg['silent_tz']) if cfg.get('silent_tz') else timezone(cfg['date_tz']),
                 'alert': cfg.get('alert')
             }
@@ -59,8 +60,10 @@ class Watcher(object):
         while True:
             for name, cfg in self.config.iteritems():
                 # check whether to silence
+                now = datetime.now(cfg['silent_tz'])
+                if cfg['silent_weekends'] and now.isoweekday() > 5:
+                    continue
                 if cfg['silent_from'] is not None and cfg['silent_until'] is not None:
-                    now = datetime.now(cfg['silent_tz'])
                     if cfg['silent_from'] < cfg['silent_until']:
                         if cfg['silent_from'] <= now.hour < cfg['silent_until']:
                             continue

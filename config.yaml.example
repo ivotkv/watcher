@@ -26,6 +26,7 @@ watchers:
             threshold: 5
             silent_from: 0
             silent_until: 8
+            silent_weekends: false
             silent_tz: 'America/Montreal'
             alert:
                 email:
